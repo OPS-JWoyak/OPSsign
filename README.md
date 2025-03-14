@@ -1,5 +1,5 @@
 # OPSsign
-Edu-focused digital signage, from Orono Public Schools
+Edu-focused digital signage leveraging the simplicity of Google Slides, from Orono Public Schools
 
 ## This solution consists of the following:
 - Raspberry Pi 5's connected to TVs, setup on the "Video" VLAN
