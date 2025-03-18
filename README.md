@@ -1,6 +1,7 @@
-# Digital Signage System
+# OPSsign
 
-A lightweight digital signage system for Raspberry Pi devices that displays Google Slides presentations with additional information like weather and time.
+A lightweight, Edu-focused, Google Slides centric digital signage system.
+Made with the help of AI, by Orono Public Schools Technology
 
 ## Overview
 
@@ -46,7 +47,7 @@ digital-signage/
 ```bash
 # Log in as the opstech user
 # Clone this repository
-git clone https://github.com/your-organization/digital-signage.git /home/opstech/signage
+git clone git@github.com:OPS-JWoyak/OPSsign.git /home/opstech/signage
 
 # Navigate to the repository
 cd /home/opstech/signage
