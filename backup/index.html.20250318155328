@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{DISTRICT_NAME} Digital Signage - {LOCATION}</title>
+    <title>Your District Name Digital Signage - Orono Middle School</title>
     <style>
         body, html {
             margin: 0;
@@ -22,10 +22,6 @@
         .slides-container {
             flex: 1;
             border: none;
-            backface-visibility: hidden;
-            /* You can also add these for extra measure */
-            -webkit-transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
         }
 
         .footer {
@@ -64,7 +60,7 @@
         <!-- Google Slides Presentation -->
         <iframe
             class="slides-container"
-            src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000"
+            src="https://docs.google.com/presentation/d/1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic/embed?start=true&loop=true&delayms=5000"
             frameborder="0"
             allowfullscreen="true">
         </iframe>
@@ -72,7 +68,7 @@
         <!-- Footer with Location and Time -->
         <div class="footer">
             <div class="location-info">
-                {LOCATION}
+                Orono Middle School
             </div>
             <div class="date-time">
                 <div class="time" id="current-time">--:--</div>
@@ -104,24 +100,6 @@
 
         // Initialize and set update intervals
         function init() {
-            // Force redraw of iframe after loading
-            setTimeout(function() {
-              console.log("Forcing redraw of slides container");
-              // Get the iframe
-              const iframe = document.querySelector('.slides-container');
-              // Save original dimensions
-              const originalWidth = iframe.style.width || "100%";
-              const originalHeight = iframe.style.height || "100%";
-              // Slightly change size to force redraw
-              iframe.style.width = "99%";
-              iframe.style.height = "99%";
-              // Restore original size after a small delay
-              setTimeout(function() {
-                iframe.style.width = originalWidth;
-                iframe.style.height = originalHeight;
-              }, 1000);
-            }, 5000); // Wait 5 seconds after page load
-
             // Initialize date and time
             updateDateTime();
 

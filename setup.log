@@ -1,0 +1,71 @@
+Starting digital signage setup at Tue Mar 18 02:14:22 PM CDT 2025
+---------------------------------------------
+Creating backup directory...
+Updating package lists and installing required packages...
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Hit:1 http://deb.debian.org/debian bookworm InRelease
+Get:2 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+Get:3 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+Get:4 http://archive.raspberrypi.com/debian bookworm InRelease [39.3 kB]
+Get:5 http://archive.raspberrypi.com/debian bookworm/main arm64 Packages [518 kB]
+Get:6 http://archive.raspberrypi.com/debian bookworm/main armhf Packages [546 kB]
+Fetched 1,206 kB in 1s (862 kB/s)
+Reading package lists...
+Building dependency tree...
+Reading state information...
+10 packages can be upgraded. Run 'apt list --upgradable' to see them.
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Reading package lists...
+Building dependency tree...
+Reading state information...
+epiphany-browser is already the newest version (43.1-1).
+x11-xserver-utils is already the newest version (7.7+9+b1).
+x11-xserver-utils set to manually installed.
+scrot is already the newest version (1.8.1-1).
+scrot set to manually installed.
+The following packages were automatically installed and are no longer required:
+  chromium-browser chromium-browser-l10n chromium-codecs-ffmpeg-extra
+  edid-decode libcamera0.2 libqt5qmlworkerscript5 libqt5quickcontrols2-5
+  libqt5quicktemplates2-5 libraspberrypi0 libwpe-1.0-1 libwpebackend-fdo-1.0-1
+  lxplug-network python3-gi-cairo qml-module-qtgraphicaleffects
+  qml-module-qtquick-controls2 qml-module-qtquick-layouts
+  qml-module-qtquick-templates2 qml-module-qtquick-window2 qml-module-qtquick2
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  unclutter-startup
+The following NEW packages will be installed:
+  unclutter unclutter-startup
+0 upgraded, 2 newly installed, 0 to remove and 10 not upgraded.
+Need to get 24.5 kB of archives.
+After this operation, 67.6 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bookworm/main arm64 unclutter arm64 8-25 [15.6 kB]
+Get:2 http://deb.debian.org/debian bookworm/main arm64 unclutter-startup all 8-25 [8,860 B]
+Preconfiguring packages ...
+Fetched 24.5 kB in 0s (142 kB/s)
+Selecting previously unselected package unclutter.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 151407 files and directories currently installed.)
+Preparing to unpack .../unclutter_8-25_arm64.deb ...
+Unpacking unclutter (8-25) ...
+Selecting previously unselected package unclutter-startup.
+Preparing to unpack .../unclutter-startup_8-25_all.deb ...
+Unpacking unclutter-startup (8-25) ...
+Setting up unclutter (8-25) ...
+update-alternatives: using /usr/bin/unclutter-classic to provide /usr/bin/unclutter (unclutter) in auto mode
+Setting up unclutter-startup (8-25) ...
+Processing triggers for man-db (2.11.2-2) ...
+Configuring Git...
+Setting up browser autostart...
+Disabling screen blanking...
+Setting execute permissions on scripts...
+Setting up scheduled maintenance...
+Creating placeholder HTML file...
+Setting file ownership...
+---------------------------------------------
+Setup completed successfully at Tue Mar 18 02:14:29 PM CDT 2025
+Log file available at: setup.log
+The system is ready for the first deployment
+To deploy content, run the deployment script from RDM

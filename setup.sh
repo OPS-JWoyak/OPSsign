@@ -28,8 +28,8 @@ sudo apt install -y epiphany-browser x11-xserver-utils unclutter scrot
 
 # Configure Git
 echo "Configuring Git..."
-git config user.name "Digital Signage System"
-git config user.email "no-reply@yourdistrict.edu"
+git config user.name "OPS-JWoyak"
+git config user.email "jason.woyak@orono.k12.mn.us"
 
 # Create autostart directory if it doesn't exist
 echo "Setting up browser autostart..."
@@ -39,7 +39,7 @@ mkdir -p /home/opstech/.config/autostart
 cat > /home/opstech/.config/autostart/signage.desktop << EOF
 [Desktop Entry]
 Type=Application
-Name=Digital Signage
+Name=OPSsign
 Exec=epiphany-browser -a --profile=/home/opstech/.config --display=:0 file:///home/opstech/signage/index.html
 Hidden=false
 X-GNOME-Autostart-enabled=true

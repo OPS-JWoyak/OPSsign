@@ -1,6 +1,5 @@
 #!/bin/bash
-# deploy.sh - Deployment script for digital signage
-# This script is designed to be run from RDM with custom fields
+# deploy.sh - Interactive deployment script for digital signage
 
 # Log file
 LOG_FILE="/home/opstech/signage/logs/deploy.log"
@@ -14,33 +13,48 @@ log_message() {
 }
 
 # Campus-wide constants (same for all displays)
-DISTRICT_NAME="Your District Name"
-LATITUDE="40.7128"  # Set this to your campus coordinates
-LONGITUDE="-74.0060"  # Set this to your campus coordinates
+DISTRICT_NAME="Orono Public Schools"
+LATITUDE="44.991117"  # Set this to your campus coordinates
+LONGITUDE="-93.596173"  # Set this to your campus coordinates
 
-# Device-specific variables (from RDM)
-LOCATION="$CUSTOM_FIELD1$"  # e.g., "Main Office", "Library"
-PRESENTATION_ID="$CUSTOM_FIELD2$"
-TEMPLATE_TYPE="$CUSTOM_FIELD3$"  # Optional, defaults to standard if not specified
+# Interactive prompt if variables aren't set
+if [ -z "$CUSTOM_FIELD1" ] || [ "$CUSTOM_FIELD1" = '$CUSTOM_FIELD1$' ]; then
+    # Prompt for location
+    echo -n "Enter location (e.g., Main Office): "
+    read LOCATION
+else
+    LOCATION="$CUSTOM_FIELD1"
+fi
+
+if [ -z "$CUSTOM_FIELD2" ] || [ "$CUSTOM_FIELD2" = '$CUSTOM_FIELD2$' ]; then
+    # Prompt for presentation ID
+    echo -n "Enter Google Slides presentation ID: "
+    read PRESENTATION_ID
+else
+    PRESENTATION_ID="$CUSTOM_FIELD2"
+fi
+
+if [ -z "$CUSTOM_FIELD3" ] || [ "$CUSTOM_FIELD3" = '$CUSTOM_FIELD3$' ]; then
+    # Prompt for template type with a default
+    echo -n "Enter template type (standard, weather, calendar) [standard]: "
+    read TEMPLATE_TYPE
+    TEMPLATE_TYPE=${TEMPLATE_TYPE:-standard}
+else
+    TEMPLATE_TYPE="$CUSTOM_FIELD3"
+fi
 
 # Ensure location has been specified
 if [ -z "$LOCATION" ]; then
-    log_message "ERROR: Location not specified in CUSTOM_FIELD1"
-    echo "ERROR: Location not specified. Please set CUSTOM_FIELD1 in RDM."
+    log_message "ERROR: Location not specified"
+    echo "ERROR: Location cannot be empty. Exiting."
     exit 1
 fi
 
 # Ensure presentation ID has been specified
 if [ -z "$PRESENTATION_ID" ]; then
-    log_message "ERROR: Presentation ID not specified in CUSTOM_FIELD2"
-    echo "ERROR: Presentation ID not specified. Please set CUSTOM_FIELD2 in RDM."
+    log_message "ERROR: Presentation ID not specified"
+    echo "ERROR: Presentation ID cannot be empty. Exiting."
     exit 1
-fi
-
-# Use default template if not specified
-if [ -z "$TEMPLATE_TYPE" ]; then
-    TEMPLATE_TYPE="standard"
-    log_message "No template type specified, using standard template"
 fi
 
 # Log start of deployment
@@ -101,22 +115,18 @@ sed -i "s/{PRESENTATION_ID}/$PRESENTATION_ID_ESCAPED/g" index.html
 # Restart browser
 log_message "Restarting browser..."
 export DISPLAY=:0
+pkill -f chromium || true
 pkill -f epiphany || true
 sleep 2
-epiphany-browser -a --profile=/home/opstech/.config --display=:0 file:///home/opstech/signage/index.html &
+
+# Launch Chromium in kiosk mode
+chromium-browser --kiosk --incognito --noerrdialogs --disable-translate file:///home/opstech/signage/index.html &
 
 # Check if browser started successfully
 sleep 5
-if ! pgrep -f epiphany > /dev/null; then
-    log_message "WARNING: Browser did not start, trying again..."
-    epiphany-browser -a --profile=/home/opstech/.config --display=:0 file:///home/opstech/signage/index.html &
-    sleep 5
-    if ! pgrep -f epiphany > /dev/null; then
-        log_message "ERROR: Browser failed to start after retry"
-        echo "ERROR: Browser failed to start. Check the log for details."
-    else
-        log_message "Browser started successfully on second attempt"
-    fi
+if ! pgrep -f chromium > /dev/null; then
+    log_message "ERROR: Browser failed to start"
+    echo "ERROR: Browser failed to start. Check the log for details."
 else
     log_message "Browser started successfully"
 fi

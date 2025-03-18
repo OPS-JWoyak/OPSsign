@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{DISTRICT_NAME} Digital Signage - {LOCATION}</title>
+    <title>Your District Name Digital Signage - Orono Middle School</title>
     <style>
         body, html {
             margin: 0;
@@ -64,7 +64,7 @@
         <!-- Google Slides Presentation -->
         <iframe
             class="slides-container"
-            src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000"
+            src="https://docs.google.com/presentation/d/1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic/embed?start=true&loop=true&delayms=5000"
             frameborder="0"
             allowfullscreen="true">
         </iframe>
@@ -72,7 +72,7 @@
         <!-- Footer with Location and Time -->
         <div class="footer">
             <div class="location-info">
-                {LOCATION}
+                Orono Middle School
             </div>
             <div class="date-time">
                 <div class="time" id="current-time">--:--</div>

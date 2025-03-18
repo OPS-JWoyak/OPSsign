@@ -1,0 +1,95 @@
+[2025-03-18 14:17:18] Starting deployment for $
+[2025-03-18 14:17:18] Template type: $
+[2025-03-18 14:17:18] Presentation ID: $
+[2025-03-18 14:17:18] Backed up current index.html
+[2025-03-18 14:17:18] Pulling latest templates from GitHub...
+[2025-03-18 14:17:24] ERROR: Template not found: templates/$/index.html.template
+[2025-03-18 14:17:24] Falling back to standard template
+[2025-03-18 14:17:24] Using template: standard
+[2025-03-18 14:17:24] Customizing template for Your District Name - $
+[2025-03-18 14:17:24] Restarting browser...
+[2025-03-18 14:17:32] WARNING: Browser did not start, trying again...
+[2025-03-18 14:17:37] ERROR: Browser failed to start after retry
+[2025-03-18 14:17:37] Deployment completed
+[2025-03-18 14:28:55] Starting deployment for $
+[2025-03-18 14:28:55] Template type: $
+[2025-03-18 14:28:55] Presentation ID: $
+[2025-03-18 14:28:55] Backed up current index.html
+[2025-03-18 14:28:55] Pulling latest templates from GitHub...
+[2025-03-18 15:26:39] Starting deployment for $
+[2025-03-18 15:26:39] Template type: $
+[2025-03-18 15:26:39] Presentation ID: $
+[2025-03-18 15:26:39] Backed up current index.html
+[2025-03-18 15:26:39] Pulling latest templates from GitHub...
+[2025-03-18 15:39:48] Starting deployment for Orono Middle School
+[2025-03-18 15:39:48] Template type: standard
+[2025-03-18 15:39:48] Presentation ID: 1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic
+[2025-03-18 15:39:48] Backed up current index.html
+[2025-03-18 15:39:48] Pulling latest templates from GitHub...
+[2025-03-18 15:39:55] Using template: standard
+[2025-03-18 15:39:55] Customizing template for Your District Name - Orono Middle School
+[2025-03-18 15:39:55] Restarting browser...
+[2025-03-18 15:40:02] WARNING: Browser did not start, trying again...
+[2025-03-18 15:40:07] ERROR: Browser failed to start after retry
+[2025-03-18 15:40:07] Deployment completed
+[2025-03-18 15:44:02] Starting deployment for Orono Middle School
+[2025-03-18 15:44:02] Template type: standard
+[2025-03-18 15:44:02] Presentation ID: 1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic
+[2025-03-18 15:44:02] Backed up current index.html
+[2025-03-18 15:44:02] Pulling latest templates from GitHub...
+[2025-03-18 15:44:07] Using template: standard
+[2025-03-18 15:44:07] Customizing template for Your District Name - Orono Middle School
+[2025-03-18 15:44:07] Restarting browser...
+[2025-03-18 15:44:14] WARNING: Browser did not start, trying again...
+[2025-03-18 15:44:19] Browser started successfully on second attempt
+[2025-03-18 15:44:19] Deployment completed
+[2025-03-18 15:53:28] Starting deployment for Orono Middle School
+[2025-03-18 15:53:28] Template type: standard
+[2025-03-18 15:53:28] Presentation ID: 1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic
+[2025-03-18 15:53:28] Backed up current index.html
+[2025-03-18 15:53:28] Pulling latest templates from GitHub...
+[2025-03-18 15:53:34] Using template: standard
+[2025-03-18 15:53:34] Customizing template for Your District Name - Orono Middle School
+[2025-03-18 15:53:34] Restarting browser...
+[2025-03-18 15:53:41] Browser started successfully
+[2025-03-18 15:53:41] Deployment completed
+[2025-03-18 15:59:13] Starting deployment for Orono Middle School
+[2025-03-18 15:59:13] Template type: standard
+[2025-03-18 15:59:13] Presentation ID: 1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic
+[2025-03-18 15:59:13] Backed up current index.html
+[2025-03-18 15:59:13] Pulling latest templates from GitHub...
+[2025-03-18 15:59:20] Using template: standard
+[2025-03-18 15:59:20] Customizing template for Your District Name - Orono Middle School
+[2025-03-18 15:59:20] Restarting browser...
+[2025-03-18 15:59:27] Browser started successfully
+[2025-03-18 15:59:27] Deployment completed
+[2025-03-18 16:04:40] Starting deployment for Orono Middle School
+[2025-03-18 16:04:40] Template type: standard
+[2025-03-18 16:04:40] Presentation ID: 1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic
+[2025-03-18 16:04:40] Backed up current index.html
+[2025-03-18 16:04:40] Pulling latest templates from GitHub...
+[2025-03-18 16:04:45] Using template: standard
+[2025-03-18 16:04:45] Customizing template for Orono Public Schools - Orono Middle School
+[2025-03-18 16:04:45] Restarting browser...
+[2025-03-18 16:04:52] Browser started successfully
+[2025-03-18 16:04:52] Deployment completed
+[2025-03-18 16:07:15] Starting deployment for Orono Middle School
+[2025-03-18 16:07:15] Template type: standard
+[2025-03-18 16:07:15] Presentation ID: 1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic
+[2025-03-18 16:07:15] Backed up current index.html
+[2025-03-18 16:07:15] Pulling latest templates from GitHub...
+[2025-03-18 16:07:23] Using template: standard
+[2025-03-18 16:07:23] Customizing template for Orono Public Schools - Orono Middle School
+[2025-03-18 16:07:23] Restarting browser...
+[2025-03-18 16:07:30] ERROR: Browser failed to start
+[2025-03-18 16:07:30] Deployment completed
+[2025-03-18 16:09:20] Starting deployment for Orono Middle School
+[2025-03-18 16:09:20] Template type: standard
+[2025-03-18 16:09:20] Presentation ID: 1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic
+[2025-03-18 16:09:20] Backed up current index.html
+[2025-03-18 16:09:20] Pulling latest templates from GitHub...
+[2025-03-18 16:09:25] Using template: standard
+[2025-03-18 16:09:25] Customizing template for Orono Public Schools - Orono Middle School
+[2025-03-18 16:09:25] Restarting browser...
+[2025-03-18 16:09:32] Browser started successfully
+[2025-03-18 16:09:32] Deployment completed
