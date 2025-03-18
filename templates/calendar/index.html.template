@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{DISTRICT_NAME} Digital Signage - {LOCATION}</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .content-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .slides-container {
+            flex: 3;
+            border: none;
+        }
+
+        .sidebar {
+            flex: 1;
+            background-color: #f8f9fa;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            max-width: 300px;
+        }
+
+        .location-header {
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .date-display {
+            padding: 15px;
+            text-align: center;
+            background-color: #e9ecef;
+        }
+
+        .current-date {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .current-time {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .calendar-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .calendar-header {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .event {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .event-time {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .event-title {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .event-location {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .no-events {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Apply different styles when events are present */
+        .has-events .no-events {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content-container">
+            <!-- Google Slides Presentation -->
+            <iframe
+                class="slides-container"
+                src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000"
+                frameborder="0"
+                allowfullscreen="true">
+            </iframe>
+
+            <!-- Sidebar with Calendar Information -->
+            <div class="sidebar">
+                <div class="location-header">
+                    {LOCATION}
+                </div>
+
+                <div class="date-display">
+                    <div class="current-date" id="current-date">--, --- --, ----</div>
+                    <div class="current-time" id="current-time">--:--</div>
+                </div>
+
+                <div class="calendar-container" id="calendar-container">
+                    <div class="calendar-header">Today's Events</div>
+                    <div id="events-list">
+                        <div class="no-events">No events scheduled for today</div>
+                        <!-- Events will be populated here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample events - in a real implementation, these would be fetched from a calendar API
+        // Format: {time: "HH:MM AM/PM", title: "Event Title", location: "Event Location"}
+        const sampleEvents = [
+            {
+                time: "8:30 AM",
+                title: "Morning Announcements",
+                location: "PA System"
+            },
+            {
+                time: "10:15 AM",
+                title: "Assembly",
+                location: "Auditorium"
+            },
+            {
+                time: "12:00 PM",
+                title: "Lunch Period Begins",
+                location: "Cafeteria"
+            },
+            {
+                time: "3:30 PM",
+                title: "Basketball Practice",
+                location: "Gymnasium"
+            },
+            {
+                time: "6:00 PM",
+                title: "PTA Meeting",
+                location: "Library"
+            }
+        ];
+
+        // Update the date and time every second
+        function updateDateTime() {
+            const now = new Date();
+
+            // Update time
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            // Update date
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        // Display events in the sidebar
+        function displayEvents(events) {
+            const eventsContainer = document.getElementById('events-list');
+
+            // Clear existing content
+            eventsContainer.innerHTML = '<div class="no-events">No events scheduled for today</div>';
+
+            if (events && events.length > 0) {
+                // If we have events, add the has-events class and clear the container
+                eventsContainer.classList.add('has-events');
+                eventsContainer.innerHTML = '';
+
+                // Add each event to the container
+                events.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'event';
+                    eventElement.innerHTML = `
+                        <div class="event-time">${event.time}</div>
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-location">${event.location}</div>
+                    `;
+                    eventsContainer.appendChild(eventElement);
+                });
+            } else {
+                eventsContainer.classList.remove('has-events');
+            }
+        }
+
+        // In a real implementation, this function would fetch events from a calendar API
+        function fetchEvents() {
+            // This is where you would normally fetch real events from a server or API
+            // For now, we'll just use the sample events
+
+            // Simulate network delay with setTimeout
+            setTimeout(() => {
+                displayEvents(sampleEvents);
+            }, 1000);
+
+            // In a real implementation, you might do something like:
+            /*
+            fetch('https://your-calendar-api-endpoint')
+                .then(response => response.json())
+                .then(data => {
+                    displayEvents(data.events);
+                })
+                .catch(error => {
+                    console.error('Error fetching events:', error);
+                });
+            */
+        }
+
+        // Initialize and set update intervals
+        function init() {
+            // Initialize date and time
+            updateDateTime();
+
+            // Fetch and display events
+            fetchEvents();
+
+            // Update date and time every second
+            setInterval(updateDateTime, 1000);
+
+            // Refresh events every hour
+            setInterval(fetchEvents, 60 * 60 * 1000);
+
+            // Reload the page once a day to prevent memory leaks
+            setTimeout(() => {
+                window.location.reload();
+            }, 24 * 60 * 60 * 1000);
+        }
+
+        // Start everything when the page loads
+        window.onload = init;
+    </script>
+</body>
+</html>

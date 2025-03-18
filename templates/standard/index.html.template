@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{DISTRICT_NAME} Digital Signage - {LOCATION}</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .slides-container {
+            flex: 1;
+            border: none;
+        }
+
+        .footer {
+            height: 60px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .location-info {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .date-time {
+            text-align: right;
+        }
+
+        .time {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .date {
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Google Slides Presentation -->
+        <iframe
+            class="slides-container"
+            src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000"
+            frameborder="0"
+            allowfullscreen="true">
+        </iframe>
+
+        <!-- Footer with Location and Time -->
+        <div class="footer">
+            <div class="location-info">
+                {LOCATION}
+            </div>
+            <div class="date-time">
+                <div class="time" id="current-time">--:--</div>
+                <div class="date" id="current-date">--, --- --, ----</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update the date and time every second
+        function updateDateTime() {
+            const now = new Date();
+
+            // Update time
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            // Update date
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        // Initialize and set update intervals
+        function init() {
+            // Initialize date and time
+            updateDateTime();
+
+            // Update date and time every second
+            setInterval(updateDateTime, 1000);
+
+            // Reload the page once a day to prevent memory leaks
+            setTimeout(() => {
+                window.location.reload();
+            }, 24 * 60 * 60 * 1000);
+        }
+
+        // Start everything when the page loads
+        window.onload = init;
+    </script>
+</body>
+</html>

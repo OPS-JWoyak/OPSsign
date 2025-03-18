@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{DISTRICT_NAME} Digital Signage - {LOCATION}</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .slides-container {
+            flex: 1;
+            border: none;
+        }
+
+        .weather-container {
+            height: 120px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .weather-info {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        .temperature {
+            font-size: 42px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .details {
+            font-size: 18px;
+        }
+
+        .conditions {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .location {
+            color: #555;
+        }
+
+        .date-time {
+            margin-right: 20px;
+            text-align: right;
+        }
+
+        .time {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .date {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .weather-icon {
+            font-size: 48px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Google Slides Presentation -->
+        <iframe
+            class="slides-container"
+            src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000"
+            frameborder="0"
+            allowfullscreen="true">
+        </iframe>
+
+        <!-- Weather and Time Container -->
+        <div class="weather-container">
+            <div class="weather-info">
+                <div class="weather-icon" id="weather-icon">🌤️</div>
+                <div class="temperature" id="temperature">--°</div>
+                <div class="details">
+                    <div class="conditions" id="conditions">Loading weather...</div>
+                    <div class="location" id="location">{LOCATION}</div>
+                </div>
+            </div>
+            <div class="date-time">
+                <div class="time" id="current-time">--:--</div>
+                <div class="date" id="current-date">--, --- --, ----</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            latitude: "{LATITUDE}",
+            longitude: "{LONGITUDE}",
+            locationName: "{LOCATION}",
+            presentationId: "{PRESENTATION_ID}",
+            refreshInterval: 24 * 60 * 60 * 1000  // 24 hours in milliseconds
+        };
+
+        // Update the date and time every second
+        function updateDateTime() {
+            const now = new Date();
+
+            // Update time
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            // Update date
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        // Update the weather information
+        function updateWeather() {
+            // Using the National Weather Service API (free, no key required)
+            fetch(`https://api.weather.gov/points/${CONFIG.latitude},${CONFIG.longitude}`)
+                .then(response => response.json())
+                .then(data => {
+                    const forecastUrl = data.properties.forecast;
+                    return fetch(forecastUrl);
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const currentForecast = data.properties.periods[0];
+
+                    // Update weather information on the page
+                    document.getElementById('temperature').textContent = `${currentForecast.temperature}°`;
+                    document.getElementById('conditions').textContent = currentForecast.shortForecast;
+                    document.getElementById('location').textContent = CONFIG.locationName;
+
+                    // Set appropriate weather icon
+                    const condition = currentForecast.shortForecast.toLowerCase();
+                    let icon = '🌤️'; // Default icon
+
+                    if (condition.includes('sunny') || condition.includes('clear')) {
+                        icon = '☀️';
+                    } else if (condition.includes('cloud')) {
+                        icon = '☁️';
+                    } else if (condition.includes('rain') || condition.includes('shower')) {
+                        icon = '🌧️';
+                    } else if (condition.includes('snow')) {
+                        icon = '❄️';
+                    } else if (condition.includes('storm') || condition.includes('thunder')) {
+                        icon = '⛈️';
+                    } else if (condition.includes('fog')) {
+                        icon = '🌫️';
+                    }
+
+                    document.getElementById('weather-icon').textContent = icon;
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    document.getElementById('conditions').textContent = 'Weather unavailable';
+                });
+        }
+
+        // Initialize and set update intervals
+        function init() {
+            // Initialize date, time, and weather
+            updateDateTime();
+            updateWeather();
+
+            // Update date and time every second
+            setInterval(updateDateTime, 1000);
+
+            // Update weather every 30 minutes
+            setInterval(updateWeather, 30 * 60 * 1000);
+
+            // Reload the page once a day to prevent memory leaks
+            setTimeout(() => {
+                window.location.reload();
+            }, CONFIG.refreshInterval);
+        }
+
+        // Start everything when the page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
