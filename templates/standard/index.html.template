@@ -22,10 +22,17 @@
         .slides-container {
             flex: 1;
             border: none;
-            backface-visibility: hidden;
-            /* You can also add these for extra measure */
-            -webkit-transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slides-iframe {
+            width: 100%;
+            max-width: 1600px;
+            aspect-ratio: 16/9;
+            border: none;
         }
 
         .footer {
@@ -62,12 +69,14 @@
 <body>
     <div class="container">
         <!-- Google Slides Presentation -->
-        <iframe
-            class="slides-container"
-            src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000"
-            frameborder="0"
-            allowfullscreen="true">
-        </iframe>
+        <div class="slides-container">
+            <iframe
+                class="slides-iframe"
+                src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000&rm=minimal"
+                frameborder="0"
+                allowfullscreen="true">
+            </iframe>
+        </div>
 
         <!-- Footer with Location and Time -->
         <div class="footer">
@@ -131,7 +140,7 @@
             // Reload the page once a day to prevent memory leaks
             setTimeout(() => {
                 window.location.reload();
-            }, 24 * 60 * 60 * 1000);
+            }, 5 * 60 * 1000);
         }
 
         // Start everything when the page loads

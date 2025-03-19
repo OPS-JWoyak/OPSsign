@@ -22,6 +22,17 @@
         .slides-container {
             flex: 1;
             border: none;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slides-iframe {
+            width: 100%;
+            max-width: 1600px;
+            aspect-ratio: 16/9;
+            border: none;
         }
 
         .weather-container {
@@ -83,12 +94,14 @@
 <body>
     <div class="container">
         <!-- Google Slides Presentation -->
-        <iframe
-            class="slides-container"
-            src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000"
-            frameborder="0"
-            allowfullscreen="true">
-        </iframe>
+        <div class="slides-container">
+            <iframe
+                class="slides-iframe"
+                src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000&rm=minimal"
+                frameborder="0"
+                allowfullscreen="true">
+            </iframe>
+        </div>
 
         <!-- Weather and Time Container -->
         <div class="weather-container">
@@ -196,7 +209,7 @@
             // Reload the page once a day to prevent memory leaks
             setTimeout(() => {
                 window.location.reload();
-            }, CONFIG.refreshInterval);
+            }, 5 * 60 * 1000);
         }
 
         // Start everything when the page loads
