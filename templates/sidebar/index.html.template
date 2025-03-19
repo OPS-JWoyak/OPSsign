@@ -245,7 +245,7 @@
             // Reload the page once a day to prevent memory leaks
             setTimeout(() => {
                 window.location.reload();
-            }, 24 * 60 * 60 * 1000);
+            }, 5 * 60 * 1000);
         }
 
         // Start everything when the page loads
