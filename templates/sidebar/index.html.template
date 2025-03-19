@@ -53,6 +53,20 @@
             flex-direction: column;
         }
 
+        /* Add this to the CSS section of your sidebar template */
+        .logo-container {
+            margin-top: auto;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        .logo {
+            width: 100px;  /* Standard desktop icon size */
+            height: auto;
+            object-fit: contain;
+            margin: 10px 0;
+        }
+
         .date-display {
             text-align: center;
             margin-bottom: 20px;
@@ -134,6 +148,11 @@
                     <div class="weather-icon" id="weather-icon">🌤️</div>
                     <div class="temperature" id="temperature">--°</div>
                     <div class="conditions" id="conditions">Loading weather...</div>
+                </div>
+
+                <!-- Add this logo container at the end of the sidebar -->
+                    <div class="logo-container">
+                    <img src="/home/opstech/signage/templates/assets/ops-torch.png" alt="OPS Logo" class="logo">
                 </div>
             </div>
             <!-- Google Slides Presentation -->

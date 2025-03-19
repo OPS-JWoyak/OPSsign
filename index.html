@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orono Public Schools Digital Signage - District Office</title>
+    <title>Orono Public Schools Digital Signage - Technology</title>
     <style>
         body, html {
             margin: 0;
@@ -51,6 +51,20 @@
             padding: 15px;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Add this to the CSS section of your sidebar template */
+        .logo-container {
+            margin-top: auto;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        .logo {
+            width: 100px;  /* Standard desktop icon size */
+            height: auto;
+            object-fit: contain;
+            margin: 10px 0;
         }
 
         .date-display {
@@ -119,7 +133,7 @@
     <div class="container">
         <!-- Header with Location and Time -->
         <div class="header">
-            <div class="location-name">District Office</div>
+            <div class="location-name">Technology</div>
             <div class="current-time" id="current-time">--:--</div>
         </div>
 
@@ -135,12 +149,17 @@
                     <div class="temperature" id="temperature">--°</div>
                     <div class="conditions" id="conditions">Loading weather...</div>
                 </div>
+
+                <!-- Add this logo container at the end of the sidebar -->
+                    <div class="logo-container">
+                    <img src="/home/opstech/signage/templates/assets/ops-torch.png" alt="OPS Logo" class="logo">
+                </div>
             </div>
             <!-- Google Slides Presentation -->
             <div class="slides-container">
               <iframe
                 class="slides-iframe"
-                src="https://docs.google.com/presentation/d/1DYUjb-BI9uvWYgZ1JD0uJkF82VlaJWbdb-S1vzO5qhI/embed?start=true&loop=true&delayms=5000&rm=minimal"
+                src="https://docs.google.com/presentation/d/1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic/embed?start=true&loop=true&delayms=5000&rm=minimal"
                 frameborder="0"
                 allowfullscreen="true">
               </iframe>
@@ -172,7 +191,7 @@
         // Update the weather information
         function updateWeather() {
             // Using the National Weather Service API (free, no key required)
-            fetch(`https://api.weather.gov/points/44.991261,-93.595977`)
+            fetch(`https://api.weather.gov/points/44.991829,-93.595339`)
                 .then(response => response.json())
                 .then(data => {
                     const forecastUrl = data.properties.forecast;
@@ -245,7 +264,7 @@
             // Reload the page once a day to prevent memory leaks
             setTimeout(() => {
                 window.location.reload();
-            }, 24 * 60 * 60 * 1000);
+            }, 5 * 60 * 1000);
         }
 
         // Start everything when the page loads
