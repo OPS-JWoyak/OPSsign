@@ -1,0 +1,493 @@
+#!/usr/bin/bash
+#
+# OPSsign - Digital Signage Management Utility
+#
+# Usage: OPSsign [command]
+#
+# Commands:
+#   setup   - Perform initial setup
+#   config  - Update configuration
+#   start   - Start the digital signage display
+#   stop    - Stop the digital signage display
+#   status  - Check the status of the signage
+#   update  - Update from GitHub
+#   help    - Show this help message
+
+# Base directory
+BASE_DIR="/home/opstech/signage"
+CONFIG_DIR="${BASE_DIR}/config"
+CONFIG_FILE="${CONFIG_DIR}/settings.yaml"
+LOG_DIR="${BASE_DIR}/logs"
+LOG_FILE="${LOG_DIR}/OPSsign.log"
+
+# Ensure required directories exist
+mkdir -p "${CONFIG_DIR}"
+mkdir -p "${LOG_DIR}"
+
+# Function to log messages
+log_message() {
+    local level="$1"
+    local message="$2"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [${level}] ${message}" | tee -a "${LOG_FILE}"
+}
+
+# Function to read YAML values
+read_yaml() {
+    local key="$1"
+    local default="$2"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo "$default"
+        return
+    fi
+
+    value=$(grep "^${key}:" "$CONFIG_FILE" | cut -d ':' -f 2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    if [ -z "$value" ]; then
+        echo "$default"
+    else
+        echo "$value"
+    fi
+}
+
+# Function to write YAML values
+write_yaml() {
+    local key="$1"
+    local value="$2"
+
+    # Create the file if it doesn't exist
+    if [ ! -f "$CONFIG_FILE" ]; then
+        touch "$CONFIG_FILE"
+    fi
+
+    # If key exists, replace it; otherwise, append it
+    if grep -q "^${key}:" "$CONFIG_FILE"; then
+        sed -i "s/^${key}:.*/${key}: ${value}/" "$CONFIG_FILE"
+    else
+        echo "${key}: ${value}" >> "$CONFIG_FILE"
+    fi
+}
+
+# Function to validate a Google Slides presentation ID
+validate_presentation_id() {
+    local id="$1"
+    # Basic validation - ensure it's not empty and has a reasonable length
+    if [ -z "$id" ] || [ ${#id} -lt 10 ]; then
+        return 1
+    fi
+    return 0
+}
+
+# Function to validate template type
+validate_template() {
+    local template="$1"
+    # Check if the template directory exists
+    if [ ! -d "${BASE_DIR}/templates/${template}" ]; then
+        return 1
+    fi
+    return 0
+}
+
+# Function to update configuration interactively
+configure() {
+    echo "OPSsign Configuration"
+    echo "====================="
+
+    # Read existing values to use as defaults
+    local current_location=$(read_yaml "location" "")
+    local current_presentation_id=$(read_yaml "presentation_id" "")
+    local current_template=$(read_yaml "template" "standard")
+    local current_district=$(read_yaml "district" "Your School District")
+    local current_latitude=$(read_yaml "latitude" "45.0000")
+    local current_longitude=$(read_yaml "longitude" "-93.0000")
+
+    # Prompt for district name
+    echo -n "District name [${current_district}]: "
+    read district
+    district=${district:-$current_district}
+    write_yaml "district" "$district"
+
+    # Prompt for location
+    echo -n "Location (e.g., Main Office) [${current_location}]: "
+    read location
+    location=${location:-$current_location}
+    if [ -z "$location" ]; then
+        echo "Location cannot be empty. Using 'Default Location'"
+        location="Default Location"
+    fi
+    write_yaml "location" "$location"
+
+    # Prompt for presentation ID
+    echo -n "Google Slides presentation ID [${current_presentation_id}]: "
+    read presentation_id
+    presentation_id=${presentation_id:-$current_presentation_id}
+
+    while ! validate_presentation_id "$presentation_id"; do
+        echo "Invalid presentation ID. Please enter a valid Google Slides presentation ID."
+        echo -n "Google Slides presentation ID: "
+        read presentation_id
+    done
+
+    write_yaml "presentation_id" "$presentation_id"
+
+    # Prompt for template
+    echo "Available templates:"
+    for template_dir in "${BASE_DIR}/templates/"*/; do
+        template_name=$(basename "$template_dir")
+        echo "  - ${template_name}"
+    done
+
+    echo -n "Template [${current_template}]: "
+    read template
+    template=${template:-$current_template}
+
+    while ! validate_template "$template"; do
+        echo "Invalid template. Please choose from the available templates."
+        echo -n "Template: "
+        read template
+    done
+
+    write_yaml "template" "$template"
+
+    # Prompt for coordinates
+    echo -n "Latitude [${current_latitude}]: "
+    read latitude
+    latitude=${latitude:-$current_latitude}
+    write_yaml "latitude" "$latitude"
+
+    echo -n "Longitude [${current_longitude}]: "
+    read longitude
+    longitude=${longitude:-$current_longitude}
+    write_yaml "longitude" "$longitude"
+
+    echo
+    echo "Configuration updated successfully."
+    echo "Run 'OPSsign start' to apply the changes."
+}
+
+# Function to deploy updated signage
+deploy() {
+    log_message "INFO" "Deploying digital signage..."
+
+    # Read configuration values
+    district=$(read_yaml "district" "Your School District")
+    location=$(read_yaml "location" "Default Location")
+    presentation_id=$(read_yaml "presentation_id" "")
+    template=$(read_yaml "template" "standard")
+    latitude=$(read_yaml "latitude" "45.0000")
+    longitude=$(read_yaml "longitude" "-93.0000")
+
+    # Validate required values
+    if [ -z "$presentation_id" ]; then
+        log_message "ERROR" "Presentation ID not configured. Run 'OPSsign config' first."
+        return 1
+    fi
+
+    # Pull latest template files from GitHub if in a git repository
+    if [ -d "${BASE_DIR}/.git" ]; then
+        log_message "INFO" "Pulling latest templates from GitHub..."
+        cd "${BASE_DIR}" || {
+            log_message "ERROR" "Could not change to ${BASE_DIR}"
+            return 1
+        }
+        git pull
+        if [ $? -ne 0 ]; then
+            log_message "WARNING" "Git pull failed, continuing with existing files"
+        fi
+    fi
+
+    # Check if template exists
+    template_file="${BASE_DIR}/templates/${template}/index.html.template"
+    if [ ! -f "$template_file" ]; then
+        log_message "ERROR" "Template not found: ${template_file}"
+        if [ -f "${BASE_DIR}/templates/standard/index.html.template" ]; then
+            log_message "INFO" "Falling back to standard template"
+            template="standard"
+            template_file="${BASE_DIR}/templates/standard/index.html.template"
+        else
+            log_message "ERROR" "Standard template not found either, cannot continue"
+            return 1
+        fi
+    fi
+
+    # Backup current index.html if it exists
+    if [ -f "${BASE_DIR}/index.html" ]; then
+        cp "${BASE_DIR}/index.html" "${BASE_DIR}/backup/index.html.$(date '+%Y%m%d%H%M%S')"
+        log_message "INFO" "Backed up current index.html"
+    fi
+
+    # Copy the template to index.html
+    cp "$template_file" "${BASE_DIR}/index.html"
+    if [ $? -ne 0 ]; then
+        log_message "ERROR" "Failed to copy template to index.html"
+        return 1
+    fi
+
+    log_message "INFO" "Using template: ${template}"
+
+    # Sanitize inputs for sed (escape special characters)
+    district_escaped=$(echo "$district" | sed 's/[\/&]/\\&/g')
+    location_escaped=$(echo "$location" | sed 's/[\/&]/\\&/g')
+    presentation_id_escaped=$(echo "$presentation_id" | sed 's/[\/&]/\\&/g')
+
+    # Replace placeholders with specific values
+    log_message "INFO" "Customizing template for ${district} - ${location}"
+    sed -i "s/{DISTRICT_NAME}/${district_escaped}/g" "${BASE_DIR}/index.html"
+    sed -i "s/{LOCATION}/${location_escaped}/g" "${BASE_DIR}/index.html"
+    sed -i "s/{LATITUDE}/${latitude}/g" "${BASE_DIR}/index.html"
+    sed -i "s/{LONGITUDE}/${longitude}/g" "${BASE_DIR}/index.html"
+    sed -i "s/{PRESENTATION_ID}/${presentation_id_escaped}/g" "${BASE_DIR}/index.html"
+
+    log_message "INFO" "Deployment completed successfully"
+    return 0
+}
+
+# Function to start the browser
+start_browser() {
+    log_message "INFO" "Starting browser..."
+    export DISPLAY=:0
+
+    # Kill any existing browser instances
+    pkill -f chromium || true
+    pkill -f epiphany || true
+    sleep 2
+
+    # Check if Chromium is installed, otherwise fall back to Epiphany
+    if command -v chromium-browser >/dev/null 2>&1; then
+        log_message "INFO" "Launching Chromium browser"
+        chromium-browser --kiosk --incognito --noerrdialogs --disable-translate \
+            "file://${BASE_DIR}/index.html" > /dev/null 2>&1 &
+        browser_pid=$!
+        browser_name="chromium"
+    elif command -v epiphany-browser >/dev/null 2>&1; then
+        log_message "INFO" "Launching Epiphany browser"
+        epiphany-browser "file://${BASE_DIR}/index.html" > /dev/null 2>&1 &
+        browser_pid=$!
+        browser_name="epiphany"
+    else
+        log_message "ERROR" "No supported browser found. Please install Chromium or Epiphany."
+        return 1
+    fi
+
+    # Check if browser started successfully
+    sleep 5
+    if ! pgrep -f $browser_name > /dev/null; then
+        log_message "ERROR" "Browser failed to start"
+        return 1
+    else
+        log_message "INFO" "Browser started successfully"
+        return 0
+    fi
+}
+
+# Function to stop the browser
+stop_browser() {
+    log_message "INFO" "Stopping browser..."
+    pkill -f chromium || true
+    pkill -f epiphany || true
+
+    # Check if browsers are still running
+    sleep 2
+    if pgrep -f chromium > /dev/null || pgrep -f epiphany > /dev/null; then
+        log_message "WARNING" "Browser did not stop gracefully, forcing termination"
+        pkill -9 -f chromium || true
+        pkill -9 -f epiphany || true
+    fi
+
+    log_message "INFO" "Browser stopped"
+}
+
+# Function to perform initial setup
+setup() {
+    echo "OPSsign Initial Setup"
+    echo "===================="
+
+    # Check if setup has already been done
+    if [ -f "$CONFIG_FILE" ]; then
+        echo "Configuration file already exists."
+        echo -n "Do you want to reconfigure? (y/n) [n]: "
+        read reconfigure
+        if [ "$reconfigure" != "y" ] && [ "$reconfigure" != "Y" ]; then
+            echo "Setup aborted. Existing configuration retained."
+            return 0
+        fi
+    fi
+
+    # Install required packages
+    echo "Installing required packages..."
+    sudo apt update
+    sudo apt install -y chromium-browser x11-xserver-utils unclutter git
+
+    # Create directory structure
+    echo "Creating directory structure..."
+    mkdir -p "${BASE_DIR}/backup"
+    mkdir -p "${BASE_DIR}/logs"
+
+    # Configure autostart
+    echo "Setting up autostart..."
+    mkdir -p /home/opstech/.config/autostart
+
+    cat > /home/opstech/.config/autostart/OPSsign.desktop << EOF
+[Desktop Entry]
+Type=Application
+Name=OPSsign Digital Signage
+Exec=/home/opstech/signage/OPSsign start
+Hidden=false
+X-GNOME-Autostart-enabled=true
+EOF
+
+    # Disable screen blanking
+    echo "Disabling screen blanking..."
+    cat > /home/opstech/.xprofile << EOF
+#!/bin/bash
+xset s off
+xset -dpms
+xset s noblank
+EOF
+    chmod +x /home/opstech/.xprofile
+
+    # Set up cron job for maintenance
+    echo "Setting up maintenance cron job..."
+    (crontab -l 2>/dev/null; echo "0 * * * * /home/opstech/signage/OPSsign status --quiet") | crontab -
+    (crontab -l 2>/dev/null; echo "0 2 * * * /home/opstech/signage/OPSsign update --quiet") | crontab -
+
+    # Run configuration
+    configure
+
+    echo
+    echo "Initial setup completed successfully."
+    echo "Run 'OPSsign start' to start the digital signage display."
+}
+
+# Function to check signage status
+check_status() {
+    # Check if browser is running
+    if pgrep -f chromium > /dev/null; then
+        browser_status="Chromium running"
+        browser_running=true
+    elif pgrep -f epiphany > /dev/null; then
+        browser_status="Epiphany running"
+        browser_running=true
+    else
+        browser_status="Browser not running"
+        browser_running=false
+    fi
+
+    # Check if configuration exists
+    if [ -f "$CONFIG_FILE" ]; then
+        config_status="Configuration present"
+    else
+        config_status="Configuration missing"
+    fi
+
+    # Check disk space
+    disk_space=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+    if [ "$disk_space" -gt 85 ]; then
+        disk_status="WARNING: Disk space critical: ${disk_space}%"
+
+        # Clean up old logs and backups if space is low
+        if [ "$1" != "--quiet" ]; then
+            echo "Cleaning up old files to free space..."
+        fi
+        find "${BASE_DIR}/backup" -type f -mtime +30 -delete
+        find "${LOG_DIR}" -type f -mtime +30 -delete
+    else
+        disk_status="Disk space OK: ${disk_space}% used"
+    fi
+
+    # Check memory usage
+    free_mem=$(free -m | awk 'NR==2 {print $4}')
+    if [ "$free_mem" -lt 100 ]; then
+        memory_status="WARNING: Low memory: ${free_mem}MB free"
+    else
+        memory_status="Memory OK: ${free_mem}MB free"
+    fi
+
+    # If --quiet flag is passed, only log issues and exit
+    if [ "$1" = "--quiet" ]; then
+        if ! $browser_running || [ "$disk_space" -gt 85 ] || [ "$free_mem" -lt 100 ]; then
+            log_message "WARNING" "Status issues detected"
+            [ ! $browser_running ] && log_message "WARNING" "Browser not running"
+            [ "$disk_space" -gt 85 ] && log_message "WARNING" "$disk_status"
+            [ "$free_mem" -lt 100 ] && log_message "WARNING" "$memory_status"
+
+            # Restart browser if it's not running
+            if ! $browser_running; then
+                log_message "INFO" "Attempting to restart browser"
+                start_browser
+            fi
+        fi
+
+        return 0
+    fi
+
+    # Display status information
+    echo "OPSsign Status"
+    echo "=============="
+    echo "Browser: $browser_status"
+    echo "Config:  $config_status"
+    echo "Disk:    $disk_status"
+    echo "Memory:  $memory_status"
+    echo
+
+    # If browser is not running, offer to start it
+    if ! $browser_running; then
+        echo -n "Browser is not running. Start it now? (y/n) [y]: "
+        read start_now
+        if [ "$start_now" != "n" ] && [ "$start_now" != "N" ]; then
+            start_browser
+        fi
+    fi
+}
+
+# Parse command line arguments
+case "$1" in
+    setup)
+        setup
+        ;;
+    config)
+        configure
+        ;;
+    start)
+        deploy && start_browser
+        ;;
+    stop)
+        stop_browser
+        ;;
+    status)
+        check_status "$2"
+        ;;
+    update)
+        if [ -d "${BASE_DIR}/.git" ]; then
+            cd "${BASE_DIR}" && git pull
+            if [ "$2" != "--quiet" ]; then
+                echo "Updated from GitHub repository."
+            fi
+        else
+            if [ "$2" != "--quiet" ]; then
+                echo "Not a git repository. Nothing to update."
+            fi
+        fi
+        ;;
+    help|--help|-h)
+        echo "OPSsign - Digital Signage Management Utility"
+        echo
+        echo "Usage: OPSsign [command]"
+        echo
+        echo "Commands:"
+        echo "  setup   - Perform initial setup"
+        echo "  config  - Update configuration"
+        echo "  start   - Start the digital signage display"
+        echo "  stop    - Stop the digital signage display"
+        echo "  status  - Check the status of the signage"
+        echo "  update  - Update from GitHub"
+        echo "  help    - Show this help message"
+        ;;
+    *)
+        echo "Unknown command: $1"
+        echo "Run 'OPSsign help' for usage information."
+        exit 1
+        ;;
+esac
+
+exit 0

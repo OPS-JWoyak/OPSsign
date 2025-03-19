@@ -1,0 +1,16 @@
+# Device-specific configuration
+/config/
+
+# Backup files
+/backup/
+
+# Logs
+/logs/
+
+# Generated index.html
+/index.html
+
+# Any temporary files
+*.tmp
+*~
+.DS_Store

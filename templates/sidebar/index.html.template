@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orono Public Schools Digital Signage - Middle School</title>
+    <title>{DISTRICT_NAME} Digital Signage - {LOCATION}</title>
     <style>
         body, html {
             margin: 0;
@@ -107,7 +107,7 @@
     <div class="container">
         <!-- Header with Location and Time -->
         <div class="header">
-            <div class="location-name">Middle School</div>
+            <div class="location-name">{LOCATION}</div>
             <div class="current-time" id="current-time">--:--</div>
         </div>
 
@@ -128,7 +128,7 @@
             <!-- Google Slides Presentation -->
             <iframe
                 class="slides-container"
-                src="https://docs.google.com/presentation/d/1E7v2rVGN8TabxalUlXSHE2zEhJxv0tEXiCxE3FD99Ic/embed?start=true&loop=true&delayms=5000&rm=minimal"
+                src="https://docs.google.com/presentation/d/{PRESENTATION_ID}/embed?start=true&loop=true&delayms=5000&rm=minimal"
                 frameborder="0"
                 allowfullscreen="true">
             </iframe>
@@ -159,7 +159,7 @@
         // Update the weather information
         function updateWeather() {
             // Using the National Weather Service API (free, no key required)
-            fetch(`https://api.weather.gov/points/44.991829,-93.595339`)
+            fetch(`https://api.weather.gov/points/{LATITUDE},{LONGITUDE}`)
                 .then(response => response.json())
                 .then(data => {
                     const forecastUrl = data.properties.forecast;

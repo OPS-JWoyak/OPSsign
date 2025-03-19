@@ -1,35 +1,32 @@
-# OPSsign
+# OPSsign - Digital Signage System
 
-A lightweight, Edu-focused, Google Slides centric digital signage system.
-Made with the help of AI, by Orono Public Schools Technology
+A lightweight digital signage system for Raspberry Pi, by Orono Public Schools Technology
 
 ## Overview
 
 This repository contains everything needed to set up and manage a fleet of Raspberry Pi digital signage displays. The system is designed to:
 
 - Display Google Slides presentations
-- Show current weather conditions
-- Display time and date
-- Be centrally managed through Devolutions Remote Desktop Manager
+- Show current weather conditions and time
+- Be easily configurable through a simple command-line utility
 - Automatically update and maintain itself
 
 ## Repository Structure
 
 ```
 digital-signage/
-├── setup.sh                   # Initial setup script
+├── opssign                    # Main management utility
 ├── templates/                 # HTML templates
-│   ├── standard/              # Basic template
+│   ├── standard/              # Basic template with footer
 │   │   └── index.html.template
-│   ├── weather/               # Template with weather
+│   ├── sidebar/               # Template with sidebar layout
 │   │   └── index.html.template
-│   └── calendar/              # Template with calendar integration
+│   └── weather/               # Template with detailed weather
 │       └── index.html.template
-├── scripts/                   # Management scripts
-│   ├── deploy.sh              # Content deployment script
-│   └── maintenance.sh         # Health check script
-├── backup/                    # Automatic backups (created by scripts)
-├── logs/                      # Log files (created by scripts)
+├── config/                    # Configuration files (not in git)
+│   └── settings.yaml          # Device-specific settings
+├── backup/                    # Automatic backups (not in git)
+├── logs/                      # Log files (not in git)
 └── README.md                  # This documentation
 ```
 
@@ -47,80 +44,105 @@ digital-signage/
 ```bash
 # Log in as the opstech user
 # Clone this repository
-git clone git@github.com:OPS-JWoyak/OPSsign.git /home/opstech/signage
+git clone https://github.com/your-organization/digital-signage.git /home/opstech/signage
 
 # Navigate to the repository
 cd /home/opstech/signage
 
-# Run the setup script
-./setup.sh
+# Make the utility executable
+chmod +x opssign
+
+# Run the setup process
+./opssign setup
 ```
 
-The setup script will:
+The setup utility will:
 - Install necessary software
 - Configure the system for kiosk display
 - Set up maintenance tasks
-- Prepare for content deployment
+- Guide you through initial configuration
+- Create a settings.yaml file with your preferences
 
-## Managing Content with RDM
+## Using the OPSsign Utility
 
-### Setting Up Sessions in Devolutions Remote Desktop Manager
+OPSsign provides a unified command-line interface for managing your digital signage:
 
-1. Create a template SSH session with these variables:
-   - CUSTOM_FIELD1 = Location name (e.g., "Main Office", "Library")
-   - CUSTOM_FIELD2 = Google Slides Presentation ID
-   - CUSTOM_FIELD3 = Template type (optional, defaults to "standard")
+```bash
+./opssign [command]
+```
 
-2. Duplicate this template for each display, updating the variables as needed
+Available commands:
 
-3. Deploy content by running this command through RDM:
-   ```bash
-   /home/opstech/signage/scripts/deploy.sh
-   ```
+- `setup` - Perform initial installation and configuration
+- `config` - Update configuration settings
+- `start` - Deploy and start the digital signage display
+- `stop` - Stop the display
+- `status` - Check system status and health
+- `update` - Update from GitHub repository
+- `help` - Show help information
 
-### Template Types
+### Configuration
 
-- **standard**: Basic Google Slides presentation
-- **weather**: Google Slides with weather and time display
-- **calendar**: Google Slides with calendar events (if implemented)
+The `config` command lets you update various settings:
+- District name
+- Location name
+- Google Slides presentation ID
+- Template selection
+- Geographic coordinates for weather
+
+All settings are stored in `config/settings.yaml` for easy manual editing if needed.
+
+### Templates
+
+OPSsign includes multiple templates for different display needs:
+
+- **standard**: Simple presentation with time/date footer
+- **sidebar**: Presentation with weather/time sidebar (best for widescreen displays)
+- **weather**: Detailed weather information with Google Slides
 
 ## Maintenance
 
-The system performs automatic maintenance through the scheduled cron job:
+The system performs automatic maintenance through scheduled cron jobs:
 - Hourly checks for browser crashes
 - Automatic browser restart if needed
-- Daily pull of latest templates from GitHub
+- Daily updates from GitHub repository
 - Log rotation and disk space management
-- Memory management
+
+You can manually check system status with:
+```bash
+./opssign status
+```
 
 ## Customization
-
-### District-Wide Settings
-
-Edit the `deploy.sh` script to update these values:
-- `DISTRICT_NAME`: Your school district name
-- `LATITUDE` and `LONGITUDE`: Your campus coordinates
 
 ### Adding New Templates
 
 1. Create a new directory under `templates/`
 2. Add an `index.html.template` file
 3. Use placeholders like `{LOCATION}`, `{PRESENTATION_ID}`, etc.
+4. Test with `./opssign config` and select your new template
 
 ## Troubleshooting
 
 Check the log files in `/home/opstech/signage/logs/`:
-- `deploy.log`: Deployment issues
-- `maintenance.log`: System health information
+- `opssign.log`: Main application log
 
-Common commands to run through RDM:
+Common commands for troubleshooting:
 ```bash
 # Check system status
-uptime && echo "Memory:" && free -h && echo "Disk:" && df -h /
+./opssign status
 
-# Restart the browser
-export DISPLAY=:0 && pkill -f epiphany && sleep 2 && epiphany-browser -a --display=:0 file:///home/opstech/signage/index.html
+# Stop and restart the display
+./opssign stop
+./opssign start
 
-# Reboot the device
-sudo reboot
+# Update configuration
+./opssign config
 ```
+
+## Contributing
+
+When contributing to this repository:
+- Device-specific configurations are not included in git (see .gitignore)
+- Focus on improving templates and the core utility
+- Test changes on a development Pi before pushing to the main repository
