@@ -1,6 +1,6 @@
 # OPSsign - Digital Signage System
 
-A lightweight digital signage system for Raspberry Pi, by Orono Public Schools Technology
+A lightweight digital signage system for Raspberry Pi devices that displays Google Slides presentations with additional information like weather and time.
 
 ## Overview
 
@@ -9,6 +9,7 @@ This repository contains everything needed to set up and manage a fleet of Raspb
 - Display Google Slides presentations
 - Show current weather conditions and time
 - Be easily configurable through a simple command-line utility
+- Support custom themes and layouts
 - Automatically update and maintain itself
 
 ## Repository Structure
@@ -16,13 +17,19 @@ This repository contains everything needed to set up and manage a fleet of Raspb
 ```
 digital-signage/
 ├── opssign                    # Main management utility
-├── templates/                 # HTML templates
+├── templates/                 # Layout templates
 │   ├── standard/              # Basic template with footer
 │   │   └── index.html.template
 │   ├── sidebar/               # Template with sidebar layout
 │   │   └── index.html.template
 │   └── weather/               # Template with detailed weather
 │       └── index.html.template
+├── themes/                    # Visual styling themes
+│   ├── default.css            # Default blue theme
+│   ├── dark.css               # Dark mode theme
+│   └── custom themes...       # Your custom themes
+├── assets/                    # Images and other static assets
+│   └── ops-torch.png          # School logo
 ├── config/                    # Configuration files (not in git)
 │   └── settings.yaml          # Device-specific settings
 ├── backup/                    # Automatic backups (not in git)
@@ -79,6 +86,7 @@ Available commands:
 - `stop` - Stop the display
 - `status` - Check system status and health
 - `update` - Update from GitHub repository
+- `theme` - Theme management (create, list)
 - `help` - Show help information
 
 ### Configuration
@@ -87,18 +95,31 @@ The `config` command lets you update various settings:
 - District name
 - Location name
 - Google Slides presentation ID
-- Template selection
+- Template selection (layout)
+- Theme selection (visual style)
 - Geographic coordinates for weather
 
 All settings are stored in `config/settings.yaml` for easy manual editing if needed.
 
-### Templates
+### Templates and Themes
 
-OPSsign includes multiple templates for different display needs:
+OPSsign separates the layout (templates) from the visual styling (themes):
 
+**Templates** define the structure and layout:
 - **standard**: Simple presentation with time/date footer
 - **sidebar**: Presentation with weather/time sidebar (best for widescreen displays)
 - **weather**: Detailed weather information with Google Slides
+
+**Themes** define colors and visual styling:
+- **default**: Standard blue theme
+- **dark**: Dark mode theme
+
+You can create custom themes with:
+```bash
+./opssign theme create
+```
+
+This interactive tool will let you customize colors for your theme.
 
 ## Maintenance
 
@@ -119,8 +140,16 @@ You can manually check system status with:
 
 1. Create a new directory under `templates/`
 2. Add an `index.html.template` file
-3. Use placeholders like `{LOCATION}`, `{PRESENTATION_ID}`, etc.
-4. Test with `./opssign config` and select your new template
+3. Focus on layout, structure, and functionality
+4. Include `<link rel="stylesheet" href="{THEME_PATH}">` in the head
+5. Use placeholders like `{LOCATION}`, `{PRESENTATION_ID}`, etc.
+6. Test with `./opssign config` and select your new template
+
+### Creating New Themes
+
+1. Run `./opssign theme create`
+2. Follow the prompts to select colors
+3. Deploy with `./opssign config` and select your theme
 
 ## Troubleshooting
 
@@ -138,6 +167,9 @@ Common commands for troubleshooting:
 
 # Update configuration
 ./opssign config
+
+# Update from GitHub
+./opssign update
 ```
 
 ## Contributing
@@ -145,4 +177,5 @@ Common commands for troubleshooting:
 When contributing to this repository:
 - Device-specific configurations are not included in git (see .gitignore)
 - Focus on improving templates and the core utility
+- Maintain the separation between templates (layout) and themes (styling)
 - Test changes on a development Pi before pushing to the main repository

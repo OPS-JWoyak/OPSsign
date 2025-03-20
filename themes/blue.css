@@ -1,0 +1,18 @@
+/* blue.css */
+:root {
+  --primary-color: #0056b3;
+  --secondary-color: #f8f9fa;
+  --text-color: #333333;
+  --accent-color: #17a2b8;
+  /* etc. */
+}
+
+/* Override specific elements */
+.header {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.sidebar {
+  background-color: var(--secondary-color);
+}

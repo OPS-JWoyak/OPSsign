@@ -1,8 +1,8 @@
-#!/usr/bin/bash
+#!/bin/bash
 #
-# OPSsign - Digital Signage Management Utility
+# opssign - Digital Signage Management Utility
 #
-# Usage: OPSsign [command]
+# Usage: opssign [command]
 #
 # Commands:
 #   setup   - Perform initial setup
@@ -18,7 +18,7 @@ BASE_DIR="/home/opstech/signage"
 CONFIG_DIR="${BASE_DIR}/config"
 CONFIG_FILE="${CONFIG_DIR}/settings.yaml"
 LOG_DIR="${BASE_DIR}/logs"
-LOG_FILE="${LOG_DIR}/OPSsign.log"
+LOG_FILE="${LOG_DIR}/opssign.log"
 
 # Ensure required directories exist
 mkdir -p "${CONFIG_DIR}"
@@ -88,6 +88,16 @@ validate_template() {
     return 0
 }
 
+# Function to validate theme
+validate_theme() {
+    local theme="$1"
+    # Check if the CSS file exists
+    if [ ! -f "${BASE_DIR}/themes/${theme}.css" ]; then
+        return 1
+    fi
+    return 0
+}
+
 # Function to update configuration interactively
 configure() {
     echo "OPSsign Configuration"
@@ -97,6 +107,7 @@ configure() {
     local current_location=$(read_yaml "location" "")
     local current_presentation_id=$(read_yaml "presentation_id" "")
     local current_template=$(read_yaml "template" "standard")
+    local current_theme=$(read_yaml "theme" "default")
     local current_district=$(read_yaml "district" "Your School District")
     local current_latitude=$(read_yaml "latitude" "45.0000")
     local current_longitude=$(read_yaml "longitude" "-93.0000")
@@ -149,6 +160,27 @@ configure() {
 
     write_yaml "template" "$template"
 
+    # Prompt for theme
+    echo "Available themes:"
+    for theme_file in "${BASE_DIR}/themes/"*.css; do
+        if [ -f "$theme_file" ]; then
+            theme_name=$(basename "$theme_file" .css)
+            echo "  - ${theme_name}"
+        fi
+    done
+
+    echo -n "Theme [${current_theme}]: "
+    read theme
+    theme=${theme:-$current_theme}
+
+    while ! validate_theme "$theme"; do
+        echo "Invalid theme. Please choose from the available themes."
+        echo -n "Theme: "
+        read theme
+    done
+
+    write_yaml "theme" "$theme"
+
     # Prompt for coordinates
     echo -n "Latitude [${current_latitude}]: "
     read latitude
@@ -162,7 +194,7 @@ configure() {
 
     echo
     echo "Configuration updated successfully."
-    echo "Run 'OPSsign start' to apply the changes."
+    echo "Run 'opssign start' to apply the changes."
 }
 
 # Function to deploy updated signage
@@ -174,12 +206,13 @@ deploy() {
     location=$(read_yaml "location" "Default Location")
     presentation_id=$(read_yaml "presentation_id" "")
     template=$(read_yaml "template" "standard")
+    theme=$(read_yaml "theme" "default")
     latitude=$(read_yaml "latitude" "45.0000")
     longitude=$(read_yaml "longitude" "-93.0000")
 
     # Validate required values
     if [ -z "$presentation_id" ]; then
-        log_message "ERROR" "Presentation ID not configured. Run 'OPSsign config' first."
+        log_message "ERROR" "Presentation ID not configured. Run 'opssign config' first."
         return 1
     fi
 
@@ -210,8 +243,22 @@ deploy() {
         fi
     fi
 
+    # Check if theme exists
+    theme_file="${BASE_DIR}/themes/${theme}.css"
+    if [ ! -f "$theme_file" ]; then
+        log_message "ERROR" "Theme not found: ${theme_file}"
+        if [ -f "${BASE_DIR}/themes/default.css" ]; then
+            log_message "INFO" "Falling back to default theme"
+            theme="default"
+            theme_file="${BASE_DIR}/themes/default.css"
+        else
+            log_message "WARNING" "Default theme not found, continuing without theme"
+        fi
+    fi
+
     # Backup current index.html if it exists
     if [ -f "${BASE_DIR}/index.html" ]; then
+        mkdir -p "${BASE_DIR}/backup"
         cp "${BASE_DIR}/index.html" "${BASE_DIR}/backup/index.html.$(date '+%Y%m%d%H%M%S')"
         log_message "INFO" "Backed up current index.html"
     fi
@@ -224,11 +271,14 @@ deploy() {
     fi
 
     log_message "INFO" "Using template: ${template}"
+    log_message "INFO" "Using theme: ${theme}"
 
     # Sanitize inputs for sed (escape special characters)
     district_escaped=$(echo "$district" | sed 's/[\/&]/\\&/g')
     location_escaped=$(echo "$location" | sed 's/[\/&]/\\&/g')
     presentation_id_escaped=$(echo "$presentation_id" | sed 's/[\/&]/\\&/g')
+    theme_path_escaped="${BASE_DIR}/themes/${theme}.css"
+    theme_path_escaped=$(echo "$theme_path_escaped" | sed 's/[\/&]/\\&/g')
 
     # Replace placeholders with specific values
     log_message "INFO" "Customizing template for ${district} - ${location}"
@@ -237,6 +287,7 @@ deploy() {
     sed -i "s/{LATITUDE}/${latitude}/g" "${BASE_DIR}/index.html"
     sed -i "s/{LONGITUDE}/${longitude}/g" "${BASE_DIR}/index.html"
     sed -i "s/{PRESENTATION_ID}/${presentation_id_escaped}/g" "${BASE_DIR}/index.html"
+    sed -i "s|{THEME_PATH}|${theme_path_escaped}|g" "${BASE_DIR}/index.html"
 
     log_message "INFO" "Deployment completed successfully"
     return 0
@@ -322,16 +373,67 @@ setup() {
     echo "Creating directory structure..."
     mkdir -p "${BASE_DIR}/backup"
     mkdir -p "${BASE_DIR}/logs"
+    mkdir -p "${BASE_DIR}/themes"
+
+    # Create default theme if it doesn't exist
+    if [ ! -f "${BASE_DIR}/themes/default.css" ]; then
+        echo "Creating default theme..."
+        cat > "${BASE_DIR}/themes/default.css" << EOF
+/* Default theme for OPSsign */
+:root {
+  --primary-color: #0056b3;
+  --secondary-color: #f8f9fa;
+  --accent-color: #17a2b8;
+  --text-color: #333333;
+  --text-light-color: #ffffff;
+  --border-color: #dddddd;
+  --background-color: #f0f0f0;
+}
+
+/* Header styling */
+.header {
+  background-color: var(--primary-color);
+  color: var(--text-light-color);
+}
+
+/* Sidebar styling */
+.sidebar {
+  background-color: var(--secondary-color);
+  border-right: 1px solid var(--border-color);
+}
+
+/* Footer styling */
+.footer {
+  background-color: var(--secondary-color);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Date and time display */
+.date-display, .time-display {
+  color: var(--text-color);
+}
+
+/* Weather elements */
+.weather-display {
+  color: var(--text-color);
+}
+
+/* Logo container */
+.logo-container {
+  background-color: var(--secondary-color);
+}
+EOF
+    fi
 
     # Configure autostart
     echo "Setting up autostart..."
     mkdir -p /home/opstech/.config/autostart
 
-    cat > /home/opstech/.config/autostart/OPSsign.desktop << EOF
+    cat > /home/opstech/.config/autostart/opssign.desktop << EOF
 [Desktop Entry]
 Type=Application
 Name=OPSsign Digital Signage
-Exec=/home/opstech/signage/OPSsign start
+Exec=/home/opstech/signage/opssign start
 Hidden=false
 X-GNOME-Autostart-enabled=true
 EOF
@@ -348,15 +450,15 @@ EOF
 
     # Set up cron job for maintenance
     echo "Setting up maintenance cron job..."
-    (crontab -l 2>/dev/null; echo "0 * * * * /home/opstech/signage/OPSsign status --quiet") | crontab -
-    (crontab -l 2>/dev/null; echo "0 2 * * * /home/opstech/signage/OPSsign update --quiet") | crontab -
+    (crontab -l 2>/dev/null; echo "0 * * * * /home/opstech/signage/opssign status --quiet") | crontab -
+    (crontab -l 2>/dev/null; echo "0 2 * * * /home/opstech/signage/opssign update --quiet") | crontab -
 
     # Run configuration
     configure
 
     echo
     echo "Initial setup completed successfully."
-    echo "Run 'OPSsign start' to start the digital signage display."
+    echo "Run 'opssign start' to start the digital signage display."
 }
 
 # Function to check signage status
@@ -426,6 +528,8 @@ check_status() {
     echo "=============="
     echo "Browser: $browser_status"
     echo "Config:  $config_status"
+    echo "Template: $(read_yaml "template" "standard")"
+    echo "Theme: $(read_yaml "theme" "default")"
     echo "Disk:    $disk_status"
     echo "Memory:  $memory_status"
     echo
@@ -438,6 +542,105 @@ check_status() {
             start_browser
         fi
     fi
+}
+
+# Function to create a new theme
+create_theme() {
+    echo "OPSsign Theme Creator"
+    echo "===================="
+
+    # Prompt for theme name
+    echo -n "Enter theme name (e.g., blue, dark, school-colors): "
+    read theme_name
+
+    if [ -z "$theme_name" ]; then
+        echo "Theme name cannot be empty."
+        return 1
+    fi
+
+    # Check if theme already exists
+    if [ -f "${BASE_DIR}/themes/${theme_name}.css" ]; then
+        echo -n "Theme '${theme_name}' already exists. Overwrite? (y/n) [n]: "
+        read overwrite
+        if [ "$overwrite" != "y" ] && [ "$overwrite" != "Y" ]; then
+            echo "Theme creation aborted."
+            return 0
+        fi
+    fi
+
+    # Prompt for theme colors
+    echo "Enter colors in hex format (e.g., #0056b3) or press Enter to use default"
+    echo -n "Primary color [#0056b3]: "
+    read primary_color
+    primary_color=${primary_color:-"#0056b3"}
+
+    echo -n "Secondary color [#f8f9fa]: "
+    read secondary_color
+    secondary_color=${secondary_color:-"#f8f9fa"}
+
+    echo -n "Accent color [#17a2b8]: "
+    read accent_color
+    accent_color=${accent_color:-"#17a2b8"}
+
+    echo -n "Text color [#333333]: "
+    read text_color
+    text_color=${text_color:-"#333333"}
+
+    echo -n "Light text color [#ffffff]: "
+    read text_light_color
+    text_light_color=${text_light_color:-"#ffffff"}
+
+    # Create the theme file
+    cat > "${BASE_DIR}/themes/${theme_name}.css" << EOF
+/* ${theme_name} theme for OPSsign */
+:root {
+  --primary-color: ${primary_color};
+  --secondary-color: ${secondary_color};
+  --accent-color: ${accent_color};
+  --text-color: ${text_color};
+  --text-light-color: ${text_light_color};
+  --border-color: #dddddd;
+  --background-color: #f0f0f0;
+}
+
+/* Header styling */
+.header {
+  background-color: var(--primary-color);
+  color: var(--text-light-color);
+}
+
+/* Sidebar styling */
+.sidebar {
+  background-color: var(--secondary-color);
+  border-right: 1px solid var(--border-color);
+}
+
+/* Footer styling */
+.footer {
+  background-color: var(--secondary-color);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Date and time display */
+.date-display, .time-display {
+  color: var(--text-color);
+}
+
+/* Weather elements */
+.weather-display {
+  color: var(--text-color);
+}
+
+/* Logo container */
+.logo-container {
+  background-color: var(--secondary-color);
+}
+EOF
+
+    echo "Theme '${theme_name}' created successfully."
+    echo "To use this theme, run 'opssign config' and select it."
+
+    return 0
 }
 
 # Parse command line arguments
@@ -469,10 +672,32 @@ case "$1" in
             fi
         fi
         ;;
+    theme)
+        # Handle theme commands
+        case "$2" in
+            create)
+                create_theme
+                ;;
+            list)
+                echo "Available themes:"
+                for theme_file in "${BASE_DIR}/themes/"*.css; do
+                    if [ -f "$theme_file" ]; then
+                        theme_name=$(basename "$theme_file" .css)
+                        echo "  - ${theme_name}"
+                    fi
+                done
+                ;;
+            *)
+                echo "Unknown theme command: $2"
+                echo "Available theme commands: create, list"
+                exit 1
+                ;;
+        esac
+        ;;
     help|--help|-h)
         echo "OPSsign - Digital Signage Management Utility"
         echo
-        echo "Usage: OPSsign [command]"
+        echo "Usage: opssign [command]"
         echo
         echo "Commands:"
         echo "  setup   - Perform initial setup"
@@ -481,11 +706,14 @@ case "$1" in
         echo "  stop    - Stop the digital signage display"
         echo "  status  - Check the status of the signage"
         echo "  update  - Update from GitHub"
+        echo "  theme   - Theme management commands"
+        echo "    create - Create a new theme"
+        echo "    list   - List available themes"
         echo "  help    - Show this help message"
         ;;
     *)
         echo "Unknown command: $1"
-        echo "Run 'OPSsign help' for usage information."
+        echo "Run 'opssign help' for usage information."
         exit 1
         ;;
 esac

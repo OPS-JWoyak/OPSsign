@@ -1,0 +1,58 @@
+/* Dark theme for OPSsign */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #34495e;
+  --accent-color: #3498db;
+  --text-color: #ecf0f1;
+  --text-light-color: #ffffff;
+  --border-color: #7f8c8d;
+  --background-color: #1a1a1a;
+}
+
+/* Header styling */
+.header {
+  background-color: var(--primary-color);
+  color: var(--text-light-color);
+}
+
+/* Sidebar styling */
+.sidebar {
+  background-color: var(--secondary-color);
+  border-right: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+/* Footer styling */
+.footer {
+  background-color: var(--secondary-color);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+/* Date and time display */
+.date-display, .time-display {
+  color: var(--text-light-color);
+}
+
+/* Weather elements */
+.weather-display {
+  color: var(--text-light-color);
+}
+
+.temperature {
+  color: var(--text-light-color);
+}
+
+.conditions {
+  color: var(--text-light-color);
+}
+
+/* Logo container */
+.logo-container {
+  background-color: var(--secondary-color);
+}
+
+/* Slides container */
+.slides-container {
+  background-color: var(--background-color);
+}

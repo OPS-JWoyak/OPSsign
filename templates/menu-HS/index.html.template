@@ -128,10 +128,6 @@
             -webkit-backface-visibility: hidden;
         }
     </style>
-
-    <!-- Theme stylesheet (injected by opssign) -->
-    <link rel="stylesheet" href="{THEME_PATH}">
-
 </head>
 <body>
     <div class="container">
