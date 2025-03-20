@@ -145,9 +145,11 @@
                 </div>
 
                 <div class="weather-display">
-                    <div class="weather-icon" id="weather-icon">🌤️</div>
-                    <div class="temperature" id="temperature">--°</div>
-                    <div class="conditions" id="conditions">Loading weather...</div>
+                  <iframe
+                    src="https://play.nutrislice.com/preview/orono-schools/hs-main"
+                    frameborder="0"
+                    allowfullscreen="true">
+                  </iframe>
                 </div>
 
                 <!-- Add this logo container at the end of the sidebar -->
